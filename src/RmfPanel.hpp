@@ -26,22 +26,11 @@
 #include <geometry_msgs/msg/point_stamped.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
-#include <rmf_door_msgs/msg/door_mode.hpp>
-#include <rmf_door_msgs/msg/door_state.hpp>
-#include <rmf_door_msgs/msg/door_request.hpp>
 #include <rmf_fleet_msgs/msg/fleet_state.hpp>
-#include <rmf_fleet_msgs/msg/mode_request.hpp>
-#include <rmf_fleet_msgs/msg/path_request.hpp>
 #include <rmf_fleet_msgs/msg/robot_mode.hpp>
 #include <rmf_fleet_msgs/msg/robot_state.hpp>
-#include <rmf_task_msgs/msg/loop.hpp>
-#include <rmf_task_msgs/msg/tasks.hpp>
-#include "rmf_task_msgs/srv/submit_task.hpp"
-#include "rmf_task_msgs/srv/cancel_task.hpp"
-#include "rmf_task_msgs/msg/priority.hpp"
-#include "rmf_task_msgs/msg/task_description.hpp"
-#include "rmf_task_msgs/msg/task_type.hpp"
 #include <std_msgs/msg/bool.hpp>
+#include <rmf_fleet_msgs/msg/destination_request.hpp>
 
 #include <QCheckBox>
 #include <QComboBox>
