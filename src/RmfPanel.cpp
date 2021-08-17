@@ -30,9 +30,21 @@
 
 namespace rmf_visualization_rviz2_plugins {
 
+using CancelTask = rmf_task_msgs::srv::CancelTask;
+using SubmitTask = rmf_task_msgs::srv::SubmitTask;
+using TaskDescription = rmf_task_msgs::msg::TaskDescription;
+using Priority = rmf_task_msgs::msg::Priority;
+using TaskType = rmf_task_msgs::msg::TaskType;
+using Loop = rmf_task_msgs::msg::Loop;
+using Request = rmf_task_msgs::srv::SubmitTask::Request;
+using Cancel = rmf_task_msgs::srv::CancelTask::Request;
 using FleetState = rmf_fleet_msgs::msg::FleetState;
 using RobotState = rmf_fleet_msgs::msg::RobotState;
+using Location = rmf_fleet_msgs::msg::Location;
+using PoseStamped = geometry_msgs::msg::PoseStamped;
+using PointStamped = geometry_msgs::msg::PointStamped;
 using PoseWithCovarianceStamped = geometry_msgs::msg::PoseWithCovarianceStamped;
+using GetParameters = rcl_interfaces::srv::GetParameters;
 using TaskSummary = rmf_task_msgs::msg::TaskSummary;
 using Graph = rmf_traffic::agv::Graph;
 using Bool = std_msgs::msg::Bool;
@@ -219,18 +231,6 @@ void RmfPanel::save(rviz_common::Config config) const
 
 // Q_SLOTS
 // Actions
-void RmfPanel::update_fire_alarm_state()
-{
-  if (_fire_alarm_state == true)
-  {
-    _fire_alarm_state = false;
-  }
-  else
-  {
-    _fire_alarm_state = true;  
-  }
-  return;
-}
 
 void RmfPanel::send_task_request()
 {

@@ -19,7 +19,6 @@ DemoPanel::DemoPanel(QWidget* parent)
 
   create_layout();
   initialize_publishers();
-  // initialize_subscribers();
   initialize_qt_connections();
   // For DP3 A&E - Hardcoded way
   update_bed_selector();
@@ -66,9 +65,8 @@ void DemoPanel::create_layout()
   QGroupBox* emergency_state_gb = create_emergency_group_box();
   
   QGridLayout* layout = new QGridLayout;
-
   layout->addWidget(dest_request_gb, 0, 0, 3, 3);
-  layout->addWidget(emergency_state_gb, 1, 0, 2, 3);
+  layout->addWidget(emergency_state_gb, 3, 0, 2, 3);
   setLayout(layout);
 }
 
@@ -80,19 +78,25 @@ QGroupBox* DemoPanel::create_request_group_box()
   QGridLayout* request_layout = new QGridLayout();
 
   _bed_name_label = new QLabel("Bed ID: ");
-  _bed_selector = new QComboBox;
+  _bed_selector_01 = new QComboBox;
+  _bed_selector_02 = new QComboBox;
 
   _end_point_name_label = new QLabel("End Point: ");
-  _end_point_selector = new QComboBox;
-  _end_point_selector->setEditable(true);
+  _end_point_selector_01 = new QComboBox;
+  _end_point_selector_01->setEditable(true);
+  _end_point_selector_02 = new QComboBox;
+  _end_point_selector_02->setEditable(true);
 
-  _send_destination_request_button = new QPushButton("Send Destination Request");
-  
+  _send_destination_request_button_01 = new QPushButton("Send Destination Request 01");
+  _send_destination_request_button_02 = new QPushButton("Send Destination Request 02");
   request_layout->addWidget(_bed_name_label, 0, 0, 1, 1);
-  request_layout->addWidget(_bed_selector, 0, 1, 1, 2);
+  request_layout->addWidget(_bed_selector_01, 0, 1, 1, 2);
+  request_layout->addWidget(_bed_selector_02, 0, 3, 1, 2);
   request_layout->addWidget(_end_point_name_label, 1, 0, 1, 1);
-  request_layout->addWidget(_end_point_selector, 1, 1, 1, 2);
-  request_layout->addWidget(_send_destination_request_button, 2, 0, 1, -1);
+  request_layout->addWidget(_end_point_selector_01, 1, 1, 1, 2);
+  request_layout->addWidget(_end_point_selector_02, 1, 3, 1, 2);
+  request_layout->addWidget(_send_destination_request_button_01, 2, 1, 1, 2);
+  request_layout->addWidget(_send_destination_request_button_02, 2, 3, 1, 2);
 
   groupbox->setLayout(request_layout);
   return groupbox;
@@ -102,7 +106,7 @@ QGroupBox* DemoPanel::create_request_group_box()
 
 QGroupBox* DemoPanel::create_emergency_group_box()
 {
-  QGroupBox* groupbox = new QGroupBox("Bed Destination Selection");
+  QGroupBox* groupbox = new QGroupBox("Emergency State Selection");
   QGridLayout* emergency_layout = new QGridLayout();
 
   _emergency_name_label = new QLabel("Emergency Signal: ");
@@ -151,9 +155,18 @@ void DemoPanel::initialize_qt_connections()
 {
   connect(this, SIGNAL(configChanged()), this, 
     SLOT(publish_emergency_signal()));
+  
+  // connect(this, SIGNAL(configChanged()), this, 
+  //   SLOT(update_bed_selector()));
 
-  connect(_send_destination_request_button, SIGNAL(clicked()), this,
-    SLOT(send_destination_request()));
+  // connect(this, SIGNAL(configChanged()), this, 
+  //   SLOT(update_endpoint_selector()));
+
+  connect(_send_destination_request_button_01, SIGNAL(clicked()), this,
+    SLOT(send_destination_request_01()));
+
+  connect(_send_destination_request_button_02, SIGNAL(clicked()), this,
+    SLOT(send_destination_request_02()));
 
    connect(_change_emergency_state_button, SIGNAL(clicked()), this,
     SLOT(update_emergency_state()));
@@ -175,11 +188,41 @@ void DemoPanel::publish_emergency_signal()
 
 //=============================================================================
 
-void DemoPanel::send_destination_request()
+void DemoPanel::send_destination_request_01()
 {
-  std::string bed_id = _bed_selector->currentText().toStdString();
-  std::string endpoint = _end_point_selector->currentText().toStdString();
-  
+  std::string bed_id = _bed_selector_01->currentText().toStdString();
+  std::string endpoint = _end_point_selector_01->currentText().toStdString();
+  std::cout << bed_id << std::endl;
+  DestinationRequest request;
+  request.robot_name = bed_id;
+  request.task_id = endpoint;
+
+  if (bed_id == "Bed001")
+  {
+    request.fleet_name = "BedFleetA";
+    for (int i = 0; i < 3; i++)
+    {
+      _bed001_destination_pub->publish(request);
+    }
+    RCLCPP_INFO(_node->get_logger(), "Bed001 Destination Request has been Published");
+  }
+
+  if (bed_id == "Bed002")
+  {
+    request.fleet_name = "BedFleetB";
+    for (int i = 0; i < 3; i++)
+    {
+      _bed002_destination_pub->publish(request);
+    }
+    RCLCPP_INFO(_node->get_logger(), "Bed002 Destination Request has been Published");
+  }
+}
+
+void DemoPanel::send_destination_request_02()
+{
+  std::string bed_id = _bed_selector_02->currentText().toStdString();
+  std::string endpoint = _end_point_selector_02->currentText().toStdString();
+  std::cout << bed_id << std::endl;
   DestinationRequest request;
   request.robot_name = bed_id;
   request.task_id = endpoint;
@@ -227,21 +270,25 @@ void DemoPanel::update_emergency_state()
 }
 
 //=============================================================================
-
+// TO DO: adding graph parsing and fleet reading and sieving
 void DemoPanel::update_bed_selector()
 {
   for (int i = 0; i < 2; i++)
   {
-    _bed_selector->addItem(QString((known_bed[i]).c_str()));
+    _bed_selector_01->addItem(QString((known_bed[i]).c_str()));
+    _bed_selector_02->addItem(QString((known_bed[i]).c_str()));
   }
 }
 
 void DemoPanel::update_endpoint_selector()
 {
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 4; i++)
   {
-    _end_point_selector->addItem(QString((defined_endpoints[i]).c_str()));
+    _end_point_selector_01->addItem(QString((defined_endpoints[i]).c_str()));
+    _end_point_selector_02->addItem(QString((defined_endpoints[i]).c_str()));
   }
 }
-
 }
+
+#include <pluginlib/class_list_macros.hpp>
+PLUGINLIB_EXPORT_CLASS(rmf_visualization_rviz2_plugins::DemoPanel, rviz_common::Panel)
